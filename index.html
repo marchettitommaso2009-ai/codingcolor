@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -11,21 +9,23 @@
   <div id="header">
     <div id="saluto">Oggi è un bel giorno!</div>
     <div id="title">
-      <h1>coding color </h1>
+      <h1>CODICI e COLORI</h1>
     </div>
   </div>
 
-  // zona dove vengono inseriti i numeri e la frase
+  // zona dove vengono inseriti prima la frase e poi i tre numeri rgb
   <div id="input">
-    <label for="inNumber">Inserisci un numero (0–255):</label>
-    <input type="number" id="inNumber" placeholder="inserisci un numero" min="0" max="255">
+    <label for="inText">1. Inserisci prima una frase:</label>
+    <input type="text" id="inText" placeholder="scrivi qui la tua frase" oninput="aggiornaFrase()">
     <br><br>
-    <label for="inText">Inserisci una frase:</label>
-    <input type="text" id="inText" placeholder="scrivi qui la tua frase">
-    <br><br>
+    <label for="inNumber">2. Inserisci un valore RGB alla volta (0–255):</label>
+    <input type="number" id="inNumber" placeholder="R, G e B" min="0" max="255">
     <button type="button" id="btnElabora" onclick="elabora()">Elabora</button>
     <button type="button" id="btnCancella" onclick="reset()">Cancella</button>
   </div>
+
+  // frase mostrata in h3 sotto l'input e colorata quando ci sono tutti e tre i valori rgb
+  <h3 id="fraseMostrata"></h3>
 
   // zona dedicata ai messaggi per capire come è andata la verifica
   <div id="output">
@@ -46,22 +46,44 @@
     console.log("data: ", d);
     document.getElementById("saluto").innerHTML = "Oggi è il \\ " + d.toLocaleString("it-IT");
 
-    // vettore che contiene i dati rgb
+    // vettore che contiene i tre valori rgb (r, g, b)
     let colori = [];
 
-    // verifica se il numero inserito è nel range rgb e colora la frase quando ci sono 3 valori
+    // aggiorna l'h3 sotto l'input mentre scrivi la frase
+    function aggiornaFrase() {
+      const frase = document.getElementById("inText").value;
+      const h3Frase = document.getElementById("fraseMostrata");
+      const error = document.getElementById("error");
+
+      h3Frase.innerHTML = frase;
+      if (frase.trim() !== "") {
+        error.innerHTML = "";
+      }
+    }
+
+    // verifica che la frase sia stata inserita, valida i tre numeri rgb e colora l'h3
     function elabora() {
+      const fraseInput = document.getElementById("inText");
+      const frase = fraseInput.value.trim();
+      const h3Frase = document.getElementById("fraseMostrata");
       const valore = document.getElementById("inNumber").value.trim();
       const numero = Number(valore);
-      const frase = document.getElementById("inText").value;
       const outText = document.getElementById("outText");
       const error = document.getElementById("error");
       const nonValidi = document.getElementById("nonValidi");
 
-      if (valore === "" || Number.isNaN(numero) || !Number.isInteger(numero) || numero < 0 || numero > 255) {
-        error.innerHTML = "\\ Il numero inserito non rispetta il criterio";
+      // controlla che la frase sia stata inserita prima dei valori rgb
+      if (frase === "") {
+        error.innerHTML = "\\ Inserisci prima una frase nell'apposito campo";
+        return;
+      }
 
-        // aggiunge il valore non valido su una nuova riga (in colonna)
+      h3Frase.innerHTML = fraseInput.value;
+
+      // controlla che il valore rgb sia un intero tra 0 e 255
+      if (valore === "" || Number.isNaN(numero) || !Number.isInteger(numero) || numero < 0 || numero > 255) {
+        error.innerHTML = "\\ Il numero inserito non rispetta il criterio (0-255)";
+
         const riga = document.createElement("p");
         riga.innerHTML = valore !== "" ? valore : "(vuoto)";
         nonValidi.appendChild(riga);
@@ -71,24 +93,32 @@
       error.innerHTML = "";
       colori.push(numero);
       console.log(colori);
-      outText.innerHTML = "\\ Numero inserito: " + numero;
 
+      // indica quale canale rgb è stato acquisito e quanti ne mancano
+      const canali = ["R", "G", "B"];
+      const indiceCanale = colori.length - 1;
+      outText.innerHTML = "\\ Valore " + canali[indiceCanale] + " inserito: " + numero + " (" + colori.length + "/3)";
+
+      // quando ci sono tutti e tre i valori, applica il colore rgb all'h3
       if (colori.length === 3) {
         const nuovoColore = "rgb(" + colori[0] + ", " + colori[1] + ", " + colori[2] + ")";
-        const testoDaMostrare = frase.trim() !== "" ? frase : "TESTO COLORATO";
-        outText.innerHTML = "\\ " + testoDaMostrare;
-        outText.style.color = nuovoColore;
+        h3Frase.style.color = nuovoColore;
+        outText.innerHTML = "\\ Colore applicato: " + nuovoColore;
         colori = [];
       }
+
+      // svuota la casella numerica per il prossimo valore rgb
+      document.getElementById("inNumber").value = "";
     }
 
     // resetta tutto a zero
     function reset() {
       colori = [];
-      document.getElementById("inNumber").value = "";
       document.getElementById("inText").value = "";
+      document.getElementById("inNumber").value = "";
+      document.getElementById("fraseMostrata").innerHTML = "";
+      document.getElementById("fraseMostrata").style.color = "";
       document.getElementById("outText").innerHTML = "Output";
-      document.getElementById("outText").style.color = "";
       document.getElementById("error").innerHTML = "";
       document.getElementById("nonValidi").innerHTML = "<h3>Valori non validi</h3>";
     }
