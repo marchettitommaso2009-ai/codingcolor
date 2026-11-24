@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -13,22 +15,31 @@
     </div>
   </div>
 
-//zona dove vengono inseriti i numeri 
+  // zona dove vengono inseriti i numeri e la frase
   <div id="input">
     <label for="inNumber">Inserisci un numero (0–255):</label>
     <input type="number" id="inNumber" placeholder="inserisci un numero" min="0" max="255">
+    <br><br>
+    <label for="inText">Inserisci una frase:</label>
+    <input type="text" id="inText" placeholder="scrivi qui la tua frase">
+    <br><br>
     <button type="button" id="btnElabora" onclick="elabora()">Elabora</button>
     <button type="button" id="btnCancella" onclick="reset()">Cancella</button>
   </div>
 
-// zona dedicata ai messaggi per capire coem è andata la verifica
+  // zona dedicata ai messaggi per capire come è andata la verifica
   <div id="output">
     <p id="outText">Output</p>
     <p id="error">Errori</p>
   </div>
 
+  // elenco in colonna dei valori non validi inseriti
+  <div id="nonValidi">
+    <h3>Valori non validi</h3>
+  </div>
+
   <script>
-    //iInizializzazione della pagina
+    // inizializzazione della pagina
     console.log("verifica esecuzione");
 
     const d = new Date();
@@ -38,15 +49,22 @@
     // vettore che contiene i dati rgb
     let colori = [];
 
-    // verifica se il numero inserito è un numero che puo essere nel range dell'rgb
+    // verifica se il numero inserito è nel range rgb e colora la frase quando ci sono 3 valori
     function elabora() {
       const valore = document.getElementById("inNumber").value.trim();
       const numero = Number(valore);
+      const frase = document.getElementById("inText").value;
       const outText = document.getElementById("outText");
       const error = document.getElementById("error");
+      const nonValidi = document.getElementById("nonValidi");
 
       if (valore === "" || Number.isNaN(numero) || !Number.isInteger(numero) || numero < 0 || numero > 255) {
         error.innerHTML = "\\ Il numero inserito non rispetta il criterio";
+
+        // aggiunge il valore non valido su una nuova riga (in colonna)
+        const riga = document.createElement("p");
+        riga.innerHTML = valore !== "" ? valore : "(vuoto)";
+        nonValidi.appendChild(riga);
         return;
       }
 
@@ -57,19 +75,22 @@
 
       if (colori.length === 3) {
         const nuovoColore = "rgb(" + colori[0] + ", " + colori[1] + ", " + colori[2] + ")";
-        outText.innerHTML = "\\ TESTO COLORATO";
+        const testoDaMostrare = frase.trim() !== "" ? frase : "TESTO COLORATO";
+        outText.innerHTML = "\\ " + testoDaMostrare;
         outText.style.color = nuovoColore;
         colori = [];
       }
     }
 
-    //  resetta tutto a zero 
+    // resetta tutto a zero
     function reset() {
       colori = [];
       document.getElementById("inNumber").value = "";
+      document.getElementById("inText").value = "";
       document.getElementById("outText").innerHTML = "Output";
       document.getElementById("outText").style.color = "";
       document.getElementById("error").innerHTML = "";
+      document.getElementById("nonValidi").innerHTML = "<h3>Valori non validi</h3>";
     }
   </script>
 </body>
